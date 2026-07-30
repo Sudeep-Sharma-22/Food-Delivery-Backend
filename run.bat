@@ -1,0 +1,2 @@
+@echo off
+powershell -ExecutionPolicy Bypass -Command "$ErrorActionPreference = 'Stop'; Write-Host 'Compiling Java files...'; $javaFiles = Get-ChildItem -Path src -Filter *.java -Recurse | Select-Object -ExpandProperty FullName; & javac -d out -cp 'lib\*' $javaFiles; if ($LASTEXITCODE -ne 0) { Write-Host 'Compilation Failed!'; exit $LASTEXITCODE }; Write-Host 'Compilation Successful!'; Write-Host ''; Write-Host 'Running Application...'; Write-Host ''; & java -cp 'out;lib\*' com.fooddelivery.main.Main"
