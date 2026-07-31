@@ -7,7 +7,7 @@ public class Order {
     private int customerId;
     private int restaurantId;
     private int deliveryAddressId;
-    private int couponId; // Can be 0 if null
+    private int couponId;
     private double totalAmount;
     private double discountAmount;
     private double finalAmount;
@@ -48,7 +48,7 @@ public class Order {
 
     @Override
     public String toString() {
-        return String.format("Order #%d | Status: %s | Final Amount: %.2f INR", 
+        return String.format("Order #%d | Status: %s | Final Amount: %.2f INR",
                              orderId, status, finalAmount);
     }
 }

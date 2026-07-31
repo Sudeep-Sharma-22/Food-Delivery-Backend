@@ -13,23 +13,23 @@ public class CouponService {
 
     public Coupon validateAndGetCoupon(String code, double orderTotal) {
         if (code == null || code.trim().isEmpty()) {
-            return null; // No coupon applied
+            return null;
         }
-        
+
         Coupon coupon = couponDao.getCouponByCode(code.toUpperCase());
         if (coupon == null) {
             System.out.println("Invalid or expired coupon.");
             return null;
         }
-        
+
         if (orderTotal < coupon.getMinOrderAmount()) {
             System.out.println("Order total must be at least " + coupon.getMinOrderAmount() + " to use this coupon.");
             return null;
         }
-        
+
         return coupon;
     }
-    
+
     public double calculateDiscount(Coupon coupon, double orderTotal) {
         if (coupon == null) return 0.0;
         double discount = orderTotal * (coupon.getDiscountPercentage() / 100.0);
@@ -41,8 +41,8 @@ public class CouponService {
 
     public void displayActiveCoupons() {
         java.util.List<Coupon> coupons = couponDao.getActiveCoupons();
-        if (coupons.isEmpty()) return; // Don't show anything if no coupons are active
-        
+        if (coupons.isEmpty()) return;
+
         System.out.println("--- AVAILABLE COUPONS ---");
         for (Coupon c : coupons) {
             System.out.println("[" + c.getCode() + "] - " + c.getDiscountPercentage() + "% off (Up to " + c.getMaxDiscountAmount() + " INR) - Min Order: " + c.getMinOrderAmount() + " INR");

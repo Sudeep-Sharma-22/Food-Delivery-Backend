@@ -18,28 +18,27 @@ public class ReviewService {
             System.err.println("Validation Error: Rating must be between 1 and 5.");
             return false;
         }
-        
+
         Review review = new Review();
         review.setCustomerId(customerId);
         review.setRestaurantId(restaurantId);
         review.setOrderId(orderId);
         review.setRating(rating);
         review.setComment(comment);
-        
+
         return reviewDao.addReview(review);
     }
-    
+
     public void displayRestaurantReviews(int restaurantId) {
         List<Review> reviews = reviewDao.getReviewsByRestaurant(restaurantId);
         if (reviews.isEmpty()) {
             System.out.println("No reviews found for this restaurant.");
             return;
         }
-        
+
         System.out.println("--- REVIEWS ---");
         for (Review r : reviews) {
             System.out.println(r.getRating() + "/5 Stars - " + r.getComment());
         }
-        System.out.println("---------------");
     }
 }

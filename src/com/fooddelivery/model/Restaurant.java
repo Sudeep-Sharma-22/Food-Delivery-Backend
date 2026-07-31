@@ -51,7 +51,7 @@ public class Restaurant {
 
     @Override
     public String toString() {
-        return String.format("[%d] %s (%s) - Location: %s - Rating: %.1f/5.0", 
+        return String.format("[%d] %s (%s) - Location: %s - Rating: %.1f/5.0",
                              restaurantId, name, cuisineType, location, avgRating);
     }
 }

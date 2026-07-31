@@ -1,34 +1,7 @@
--- =============================================================================
--- FOOD DELIVERY BACKEND — DATABASE SCHEMA
--- =============================================================================
--- File:    create_database.sql
--- Purpose: Creates the database and all 9 tables with constraints.
--- Order:   Tables are created in topological order of FK dependencies.
--- Usage:   Run this script in MySQL: source create_database.sql;
--- =============================================================================
-
--- -----------------------------------------------------------------------------
--- STEP 1: CREATE AND USE THE DATABASE
--- -----------------------------------------------------------------------------
-
-DROP DATABASE IF EXISTS food_delivery;
-CREATE DATABASE food_delivery CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS food_delivery CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE food_delivery;
 
-
--- =============================================================================
--- LEVEL 0: ROOT ENTITIES (No foreign key dependencies)
--- =============================================================================
-
--- -----------------------------------------------------------------------------
--- TABLE 1: users
--- -----------------------------------------------------------------------------
--- Root entity. All person-types (Customer, Owner, Delivery Partner) in one
--- table, differentiated by the 'role' column. Referenced by 6 FKs across
--- the schema. No table needs to exist before this one.
--- -----------------------------------------------------------------------------
-
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id     INT             AUTO_INCREMENT,
     name        VARCHAR(100)    NOT NULL,
     email       VARCHAR(150)    NOT NULL,
@@ -42,15 +15,7 @@ CREATE TABLE users (
     CONSTRAINT uk_users_email  UNIQUE      (email)
 );
 
-
--- -----------------------------------------------------------------------------
--- TABLE 2: coupons
--- -----------------------------------------------------------------------------
--- Root entity. Promotional discount codes. Referenced by orders.coupon_id.
--- No FK dependencies — can be created alongside users.
--- -----------------------------------------------------------------------------
-
-CREATE TABLE coupons (
+CREATE TABLE IF NOT EXISTS coupons (
     coupon_id           INT             AUTO_INCREMENT,
     code                VARCHAR(20)     NOT NULL,
     discount_percentage DECIMAL(5,2)    NOT NULL,
@@ -72,20 +37,7 @@ CREATE TABLE coupons (
     CONSTRAINT ck_coupons_current_usage  CHECK (current_usage >= 0)
 );
 
-
--- =============================================================================
--- LEVEL 1: ENTITIES DEPENDING ON LEVEL 0
--- =============================================================================
-
--- -----------------------------------------------------------------------------
--- TABLE 3: addresses
--- -----------------------------------------------------------------------------
--- Depends on: users (FK: user_id → users.user_id)
--- Implements the 1:N relationship: Users → Addresses
--- A user can have multiple addresses (Home, Work, Other).
--- -----------------------------------------------------------------------------
-
-CREATE TABLE addresses (
+CREATE TABLE IF NOT EXISTS addresses (
     address_id   INT             AUTO_INCREMENT,
     user_id      INT             NOT NULL,
     address_line VARCHAR(255)    NOT NULL,
@@ -102,16 +54,7 @@ CREATE TABLE addresses (
         ON UPDATE CASCADE
 );
 
-
--- -----------------------------------------------------------------------------
--- TABLE 4: restaurants
--- -----------------------------------------------------------------------------
--- Depends on: users (FK: owner_id → users.user_id)
--- Implements the 1:N relationship: Users (Owners) → Restaurants
--- avg_rating and total_reviews are denormalized (kept in sync by trigger).
--- -----------------------------------------------------------------------------
-
-CREATE TABLE restaurants (
+CREATE TABLE IF NOT EXISTS restaurants (
     restaurant_id  INT             AUTO_INCREMENT,
     owner_id       INT             NOT NULL,
     name           VARCHAR(150)    NOT NULL,
@@ -131,20 +74,7 @@ CREATE TABLE restaurants (
         ON UPDATE CASCADE
 );
 
-
--- =============================================================================
--- LEVEL 2: ENTITIES DEPENDING ON LEVEL 1
--- =============================================================================
-
--- -----------------------------------------------------------------------------
--- TABLE 5: menu_items
--- -----------------------------------------------------------------------------
--- Depends on: restaurants (FK: restaurant_id → restaurants.restaurant_id)
--- Implements the 1:N relationship: Restaurants → Menu Items
--- CHECK constraint ensures price is always positive.
--- -----------------------------------------------------------------------------
-
-CREATE TABLE menu_items (
+CREATE TABLE IF NOT EXISTS menu_items (
     item_id        INT             AUTO_INCREMENT,
     restaurant_id  INT             NOT NULL,
     name           VARCHAR(150)    NOT NULL,
@@ -163,21 +93,7 @@ CREATE TABLE menu_items (
     CONSTRAINT ck_menu_items_price      CHECK (price > 0)
 );
 
-
--- =============================================================================
--- LEVEL 3: THE HUB ENTITY (Depends on Levels 0, 1, and 2)
--- =============================================================================
-
--- -----------------------------------------------------------------------------
--- TABLE 6: orders
--- -----------------------------------------------------------------------------
--- Depends on: users, restaurants, addresses, coupons
--- The most connected table — 5 foreign keys.
--- Two FKs reference users (customer_id and delivery_partner_id).
--- delivery_partner_id and coupon_id are NULLABLE (partial participation).
--- -----------------------------------------------------------------------------
-
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
     order_id             INT             AUTO_INCREMENT,
     customer_id          INT             NOT NULL,
     restaurant_id        INT             NOT NULL,
@@ -216,21 +132,7 @@ CREATE TABLE orders (
         ON UPDATE CASCADE
 );
 
-
--- =============================================================================
--- LEVEL 4: ENTITIES DEPENDING ON LEVEL 3 (the orders table)
--- =============================================================================
-
--- -----------------------------------------------------------------------------
--- TABLE 7: order_items (Junction Table / Associative Entity)
--- -----------------------------------------------------------------------------
--- Depends on: orders, menu_items
--- Resolves the M:N relationship: Orders ↔ Menu Items
--- COMPOSITE PRIMARY KEY: (order_id, item_id) — no auto-increment.
--- CHECK constraint ensures quantity is always positive.
--- -----------------------------------------------------------------------------
-
-CREATE TABLE order_items (
+CREATE TABLE IF NOT EXISTS order_items (
     order_id        INT             NOT NULL,
     item_id         INT             NOT NULL,
     quantity        INT             NOT NULL,
@@ -249,17 +151,7 @@ CREATE TABLE order_items (
     CONSTRAINT ck_order_items_quantity   CHECK (quantity > 0)
 );
 
-
--- -----------------------------------------------------------------------------
--- TABLE 8: payments
--- -----------------------------------------------------------------------------
--- Depends on: orders
--- Implements 1:1 relationship: Orders ↔ Payments
--- The 1:1 is enforced by FK + UNIQUE on order_id.
--- RESTRICT on delete — financial records must survive.
--- -----------------------------------------------------------------------------
-
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
     payment_id       INT             AUTO_INCREMENT,
     order_id         INT             NOT NULL,
     amount           DECIMAL(10,2)   NOT NULL,
@@ -275,18 +167,7 @@ CREATE TABLE payments (
     CONSTRAINT uk_payments_order_id  UNIQUE (order_id)
 );
 
-
--- -----------------------------------------------------------------------------
--- TABLE 9: reviews
--- -----------------------------------------------------------------------------
--- Depends on: users, restaurants, orders
--- Three FKs connecting customer, restaurant, and order.
--- FK + UNIQUE on order_id implements 1:1 (one review per order).
--- CHECK constraint restricts rating to 1–5.
--- restaurant_id is denormalized (could be derived via order → restaurant join).
--- -----------------------------------------------------------------------------
-
-CREATE TABLE reviews (
+CREATE TABLE IF NOT EXISTS reviews (
     review_id      INT             AUTO_INCREMENT,
     customer_id    INT             NOT NULL,
     restaurant_id  INT             NOT NULL,
@@ -311,16 +192,5 @@ CREATE TABLE reviews (
     CONSTRAINT uk_reviews_order_id      UNIQUE (order_id),
     CONSTRAINT ck_reviews_rating        CHECK (rating BETWEEN 1 AND 5)
 );
-
-
--- =============================================================================
--- SCHEMA CREATION COMPLETE
--- =============================================================================
--- Tables created: 9
--- Primary Keys:   9  (8 surrogate + 1 composite)
--- Foreign Keys:  13
--- Unique Keys:    4  (users.email, coupons.code, payments.order_id, reviews.order_id)
--- Check Constr:   9  (price, quantity, rating, 6 coupon rules)
--- =============================================================================
 
 SELECT 'Database food_delivery created successfully with 9 tables.' AS status;

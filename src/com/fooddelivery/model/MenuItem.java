@@ -49,8 +49,8 @@ public class MenuItem {
 
     @Override
     public String toString() {
-        return String.format("[%d] %s (%.2f INR) - %s | %s", 
-                             itemId, name, price, isVegetarian ? "Veg" : "Non-Veg", 
+        return String.format("[%d] %s (%.2f INR) - %s | %s",
+                             itemId, name, price, isVegetarian ? "Veg" : "Non-Veg",
                              isAvailable ? "Available" : "Out of Stock");
     }
 }

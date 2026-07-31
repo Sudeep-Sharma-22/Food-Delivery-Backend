@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RestaurantDaoImpl implements IRestaurantDao {
-
     @Override
     public List<Restaurant> getAllActiveRestaurants() {
         List<Restaurant> restaurants = new ArrayList<>();
@@ -75,7 +74,7 @@ public class RestaurantDaoImpl implements IRestaurantDao {
             pstmt.setString(2, restaurant.getName());
             pstmt.setString(3, restaurant.getCuisineType());
             pstmt.setString(4, restaurant.getLocation());
-            pstmt.setString(5, "Demo City"); // Assuming simple UI for now
+            pstmt.setString(5, "Demo City");
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error adding restaurant: " + e.getMessage());

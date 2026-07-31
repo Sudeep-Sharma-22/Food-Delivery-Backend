@@ -11,11 +11,9 @@ public class User {
     private String role;
     private Timestamp createdAt;
 
-    // Default constructor (Needed by frameworks and sometimes JDBC tools)
     public User() {
     }
 
-    // Parameterized constructor
     public User(int userId, String name, String email, String phone, String passwordHash, String role, Timestamp createdAt) {
         this.userId = userId;
         this.name = name;
@@ -26,7 +24,6 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    // Getters and Setters
     public int getUserId() { return userId; }
     public void setUserId(int userId) { this.userId = userId; }
 
@@ -48,7 +45,6 @@ public class User {
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 
-    // Override toString() for easy debugging
     @Override
     public String toString() {
         return "User{" +

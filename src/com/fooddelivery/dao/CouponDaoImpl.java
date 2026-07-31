@@ -9,17 +9,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class CouponDaoImpl implements ICouponDao {
-
     @Override
     public Coupon getCouponByCode(String code) {
         String query = "SELECT * FROM coupons WHERE code = ? AND is_active = TRUE AND current_usage < max_usage";
         Coupon coupon = null;
         Connection conn = DatabaseConnection.getConnection();
-        
+
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, code);
             ResultSet rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 coupon = new Coupon();
                 coupon.setCouponId(rs.getInt("coupon_id"));
@@ -36,7 +35,7 @@ public class CouponDaoImpl implements ICouponDao {
         } catch (SQLException e) {
             System.err.println("Error fetching coupon: " + e.getMessage());
         }
-        
+
         return coupon;
     }
 
@@ -45,7 +44,7 @@ public class CouponDaoImpl implements ICouponDao {
         java.util.List<Coupon> coupons = new java.util.ArrayList<>();
         String query = "SELECT * FROM coupons WHERE is_active = TRUE AND current_usage < max_usage";
         Connection conn = DatabaseConnection.getConnection();
-        
+
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -65,7 +64,7 @@ public class CouponDaoImpl implements ICouponDao {
         } catch (SQLException e) {
             System.err.println("Error fetching active coupons: " + e.getMessage());
         }
-        
+
         return coupons;
     }
 }

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MenuItemDaoImpl implements IMenuItemDao {
-
     @Override
     public List<MenuItem> getMenuByRestaurant(int restaurantId) {
         List<MenuItem> menu = new ArrayList<>();

@@ -11,19 +11,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReviewDaoImpl implements IReviewDao {
-
     @Override
     public boolean addReview(Review review) {
         String query = "INSERT INTO reviews (customer_id, restaurant_id, order_id, rating, comment) VALUES (?, ?, ?, ?, ?)";
         Connection conn = DatabaseConnection.getConnection();
-        
+
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, review.getCustomerId());
             pstmt.setInt(2, review.getRestaurantId());
             pstmt.setInt(3, review.getOrderId());
             pstmt.setInt(4, review.getRating());
             pstmt.setString(5, review.getComment());
-            
+
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error adding review: " + e.getMessage());
@@ -36,11 +35,11 @@ public class ReviewDaoImpl implements IReviewDao {
         List<Review> reviews = new ArrayList<>();
         String query = "SELECT * FROM reviews WHERE restaurant_id = ?";
         Connection conn = DatabaseConnection.getConnection();
-        
+
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, restaurantId);
             ResultSet rs = pstmt.executeQuery();
-            
+
             while (rs.next()) {
                 reviews.add(new Review(
                     rs.getInt("review_id"),

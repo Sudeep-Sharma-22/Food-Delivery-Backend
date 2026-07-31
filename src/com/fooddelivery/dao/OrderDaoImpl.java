@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrderDaoImpl implements IOrderDao {
-
     @Override
     public boolean placeOrder(Order order, List<OrderItem> items) {
         Connection conn = DatabaseConnection.getConnection();
@@ -24,11 +23,8 @@ public class OrderDaoImpl implements IOrderDao {
         String insertItemSql = "INSERT INTO order_items (order_id, item_id, quantity, price_at_order, subtotal) VALUES (?, ?, ?, ?, ?)";
 
         try {
-            // 1. START TRANSACTION (Disable Auto-Commit)
             conn.setAutoCommit(false);
 
-            // 2. Insert the main order
-            // We use RETURN_GENERATED_KEYS so we can get the auto-incremented order_id
             try (PreparedStatement orderStmt = conn.prepareStatement(insertOrderSql, Statement.RETURN_GENERATED_KEYS)) {
                 orderStmt.setInt(1, order.getCustomerId());
                 orderStmt.setInt(2, order.getRestaurantId());
@@ -43,7 +39,6 @@ public class OrderDaoImpl implements IOrderDao {
                     throw new SQLException("Creating order failed, no rows affected.");
                 }
 
-                // 3. Retrieve the generated order_id
                 int generatedOrderId;
                 try (ResultSet generatedKeys = orderStmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
@@ -54,7 +49,6 @@ public class OrderDaoImpl implements IOrderDao {
                     }
                 }
 
-                // 4. Insert each order item linked to the new order_id
                 try (PreparedStatement itemStmt = conn.prepareStatement(insertItemSql)) {
                     for (OrderItem item : items) {
                         itemStmt.setInt(1, generatedOrderId);
@@ -62,23 +56,19 @@ public class OrderDaoImpl implements IOrderDao {
                         itemStmt.setInt(3, item.getQuantity());
                         itemStmt.setDouble(4, item.getPriceAtOrder());
                         itemStmt.setDouble(5, item.getSubtotal());
-                        
-                        // Add to batch for better performance on multiple inserts
-                        itemStmt.addBatch(); 
+
+                        itemStmt.addBatch();
                     }
-                    // Execute all item inserts at once
                     itemStmt.executeBatch();
                 }
             }
 
-            // 5. COMMIT TRANSACTION (If we reach here, everything succeeded)
             conn.commit();
             isSuccess = true;
 
         } catch (SQLException e) {
             System.err.println("Transaction Failed! Rolling back. Error: " + e.getMessage());
             try {
-                // 6. ROLLBACK TRANSACTION (Undo partial inserts)
                 if (conn != null) {
                     conn.rollback();
                 }
@@ -87,7 +77,6 @@ public class OrderDaoImpl implements IOrderDao {
             }
         } finally {
             try {
-                // 7. Reset auto-commit so the connection can be used normally later
                 if (conn != null) {
                     conn.setAutoCommit(true);
                 }

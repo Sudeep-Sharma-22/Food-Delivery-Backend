@@ -21,7 +21,7 @@ public class PaymentService {
         payment.setOrderId(orderId);
         payment.setAmount(amount);
         payment.setPaymentMethod(method.toUpperCase());
-        payment.setPaymentStatus("COMPLETED"); // Simulated successful payment
+        payment.setPaymentStatus("COMPLETED");
 
         return paymentDao.processPayment(payment);
     }

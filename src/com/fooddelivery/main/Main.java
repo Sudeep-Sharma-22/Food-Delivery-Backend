@@ -23,8 +23,7 @@ import java.util.Scanner;
 public class Main {
     private static User loggedInUser = null;
     private static Scanner scanner = new Scanner(System.in);
-    
-    // Services
+
     private static UserService userService = new UserService();
     private static RestaurantService restaurantService = new RestaurantService();
     private static MenuItemService menuItemService = new MenuItemService();
@@ -143,7 +142,7 @@ public class Main {
                     String rName = (r != null) ? r.getName() : "Unknown";
                     System.out.println("Order #" + o.getOrderId() + " | Restaurant: " + rName + " | Status: " + o.getStatus());
                 }
-                
+
                 System.out.print("Enter Order ID to review: "); int oId = getIntInput();
                 Order selectedOrder = null;
                 for (Order o : pastOrders) {
@@ -152,7 +151,7 @@ public class Main {
                         break;
                     }
                 }
-                
+
                 if (selectedOrder == null) {
                     System.out.println("Invalid Order ID.");
                     break;
@@ -174,7 +173,7 @@ public class Main {
         restaurantService.displayOpenRestaurants();
         System.out.print("Enter Restaurant ID to order from: ");
         int restId = getIntInput();
-        
+
         List<MenuItem> menu = menuItemService.getMenu(restId);
         System.out.println("--- MENU FOR RESTAURANT " + restId + " ---");
         if (menu.isEmpty()) {
@@ -184,7 +183,7 @@ public class Main {
         for (MenuItem item : menu) {
             System.out.println(item.toString());
         }
-        
+
         List<Address> addresses = addressService.getUserAddresses(loggedInUser.getUserId());
         if (addresses.isEmpty()) {
             System.out.println("You have no addresses! Please add an address first.");
@@ -200,7 +199,7 @@ public class Main {
             System.out.print("Enter Item ID (0 to finish): ");
             int itemId = getIntInput();
             if (itemId <= 0) break;
-            
+
             MenuItem selectedItem = null;
             for (MenuItem item : menu) {
                 if (item.getItemId() == itemId) {
@@ -208,34 +207,34 @@ public class Main {
                     break;
                 }
             }
-            
+
             if (selectedItem == null) {
                 System.out.println("Invalid Item ID. Try again.");
                 continue;
             }
-            
+
             System.out.print("Quantity: ");
             int qty = getIntInput();
             if (qty <= 0) {
                 System.out.println("Quantity must be at least 1.");
                 continue;
             }
-            
+
             double price = selectedItem.getPrice();
             cart.add(new OrderItem(0, itemId, qty, price, price * qty));
             System.out.println(selectedItem.getName() + " added to cart.");
         }
 
         if (cart.isEmpty()) return;
-        
+
         double totalBeforeDiscount = 0;
         for (OrderItem item : cart) totalBeforeDiscount += item.getSubtotal();
-        
+
         System.out.println("\nCart Subtotal: " + totalBeforeDiscount + " INR");
         couponService.displayActiveCoupons();
         System.out.print("Enter Coupon Code (or press Enter to skip): ");
         String code = scanner.nextLine();
-        
+
         double discount = 0;
         if (!code.isEmpty()) {
             Coupon coupon = couponService.validateAndGetCoupon(code, totalBeforeDiscount);
@@ -297,7 +296,7 @@ public class Main {
                     break;
                 }
                 for (Restaurant r : myRests) System.out.println(r);
-                
+
                 System.out.print("Restaurant ID: "); int rId = getIntInput();
                 System.out.print("Item Name: "); String iName = scanner.nextLine();
                 System.out.print("Description: "); String desc = scanner.nextLine();
@@ -329,7 +328,7 @@ public class Main {
                 } else {
                     for (Order o : restOrders) System.out.println(o);
                 }
-                
+
                 System.out.print("Order ID to update: "); int oId = getIntInput();
                 System.out.print("New Status (PREPARING/READY): "); String status = scanner.nextLine().toUpperCase();
                 if (orderService.updateOrderStatus(oId, status)) {

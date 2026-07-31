@@ -15,7 +15,6 @@ public class OrderService {
     }
 
     public boolean placeOrder(Order order, List<OrderItem> items) {
-        // Business Validation
         if (order.getCustomerId() <= 0 || order.getRestaurantId() <= 0) {
             System.err.println("Validation Error: Invalid Customer or Restaurant ID.");
             return false;
@@ -25,7 +24,6 @@ public class OrderService {
             return false;
         }
 
-        // Calculate total amount from items to ensure no tampering
         double calculatedTotal = 0;
         for (OrderItem item : items) {
             if (item.getQuantity() <= 0) {
@@ -35,7 +33,6 @@ public class OrderService {
             calculatedTotal += item.getSubtotal();
         }
 
-        // Apply calculated total to order (overriding whatever was passed in)
         order.setTotalAmount(calculatedTotal);
         order.setFinalAmount(calculatedTotal - order.getDiscountAmount());
         order.setStatus("PLACED");

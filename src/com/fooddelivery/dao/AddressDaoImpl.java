@@ -11,12 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AddressDaoImpl implements IAddressDao {
-
     @Override
     public boolean insertAddress(Address address) {
         String query = "INSERT INTO addresses (user_id, address_line, city, state, pincode, is_default, label) VALUES (?, ?, ?, ?, ?, ?, ?)";
         Connection conn = DatabaseConnection.getConnection();
-        
+
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, address.getUserId());
             pstmt.setString(2, address.getAddressLine());
@@ -25,7 +24,7 @@ public class AddressDaoImpl implements IAddressDao {
             pstmt.setString(5, address.getPincode());
             pstmt.setBoolean(6, address.isDefault());
             pstmt.setString(7, address.getLabel());
-            
+
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error inserting address: " + e.getMessage());
@@ -38,11 +37,11 @@ public class AddressDaoImpl implements IAddressDao {
         List<Address> addresses = new ArrayList<>();
         String query = "SELECT * FROM addresses WHERE user_id = ?";
         Connection conn = DatabaseConnection.getConnection();
-        
+
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();
-            
+
             while (rs.next()) {
                 addresses.add(new Address(
                     rs.getInt("address_id"),
